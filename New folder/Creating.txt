@@ -1,0 +1,2 @@
+About
+C#.NET Implementation of Hierarchical Temporal Memory Cortical Learning Algorithm.
