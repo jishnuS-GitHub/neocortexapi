@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace NeoCortexApi
@@ -43,13 +44,13 @@ namespace NeoCortexApi
         /// <summary>
         /// Get the list of active cells from indicies.
         /// </summary>
-        public ICollection<Cell> ActiveCells
+        public IList<Cell> ActiveCells
         {
             get
             {
                 var actCells = CurrActiveCells.Values;
 
-                return actCells;
+                return actCells.ToList();
             }
         }
 
@@ -69,13 +70,12 @@ namespace NeoCortexApi
 
                     if (!AllCellsSparse.TryGetValue(cellIndex, out cell))
                     {
-                        cell = new Cell(-1, (int)cellIndex);
+                        cell = new Cell(CreateIdFromString(Name), (int)cellIndex);
 
                         AllCellsSparse.TryAdd(cellIndex, cell);                       
                     }
 
-                    CurrActiveCells.TryAdd(cellIndex, cell);
-                    
+                    CurrActiveCells.TryAdd(cellIndex, cell);                    
                 }
             }
         }
@@ -116,6 +116,23 @@ namespace NeoCortexApi
         {
             return $"{Name} - Cells: {_numCells} - Active Cells : {CurrActiveCells.Count}";
         }
-              
+
+        /// <summary>
+        /// Creates the ID from the string.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private int CreateIdFromString(string input)
+        {
+            byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+
+            MD5 md5 = MD5.Create();
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            // Convert the hash value to an integer
+            int numericId = BitConverter.ToInt32(hashBytes, 0);
+
+            return numericId;
+        }
     }
 }
